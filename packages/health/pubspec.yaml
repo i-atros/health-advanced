@@ -1,4 +1,4 @@
-name: health_avanced
+name: health
 description: Wrapper for the iOS HealthKit and Android GoogleFit services.
 version: 2021.06.30
 homepage: https://gitlab.com/petleo-and-iatros-opensource/health-advanced

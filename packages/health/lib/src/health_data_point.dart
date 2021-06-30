@@ -2,7 +2,7 @@ part of '../health.dart';
 
 /// A [HealthDataPoint] object corresponds to a data point captures from GoogleFit or Apple HealthKit
 class HealthDataPoint {
-  num _value;
+  num? _value;
   List _values;
   HealthDataType _type;
   HealthDataUnit _unit;
@@ -22,15 +22,14 @@ class HealthDataPoint {
       this._platform,
       this._deviceId,
       this._sourceId,
-      this._sourceName
-      [this._value, this._values]) {
+      this._sourceName,
+      [this._values = const []]) {
     /// Set the value to minutes rather than the category
     /// returned by the native API
-    if (this._value != null &&
-        (type == HealthDataType.MINDFULNESS ||
-            type == HealthDataType.SLEEP_IN_BED ||
-            type == HealthDataType.SLEEP_ASLEEP ||
-            type == HealthDataType.SLEEP_AWAKE)) {
+    if (type == HealthDataType.MINDFULNESS ||
+        type == HealthDataType.SLEEP_IN_BED ||
+        type == HealthDataType.SLEEP_ASLEEP ||
+        type == HealthDataType.SLEEP_AWAKE) {
       this._value = _convertMinutes();
     }
   }
@@ -68,7 +67,7 @@ class HealthDataPoint {
       'sourceName: $sourceName,';
 
   /// Get the quantity value of the data point
-  num get value => _value;
+  num? get value => _value;
 
   /// Get the list of values for the data point
   List get values => _values;

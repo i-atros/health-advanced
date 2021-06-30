@@ -15,7 +15,7 @@ enum AppState {
   FETCHING_DATA,
   DATA_READY,
   NO_DATA,
-  AUTH_NOT_GRANTED
+  AUTH_NOT_GRANTED,
 }
 
 class _MyAppState extends State<MyApp> {
@@ -26,6 +26,7 @@ class _MyAppState extends State<MyApp> {
   void initState() {
     super.initState();
   }
+
 
   Future fetchData() async {
     /// Get everything from midnight until now
@@ -54,8 +55,7 @@ class _MyAppState extends State<MyApp> {
     if (accessWasGranted) {
       try {
         /// Fetch new data
-        List<HealthDataPoint> healthData =
-            await health.getHealthDataFromTypes(startDate, endDate, types);
+        List<HealthDataPoint> healthData = await health.getHealthDataFromTypes(startDate, endDate, types);
 
         /// Save all the new data points
         _healthDataList.addAll(healthData);
@@ -69,15 +69,14 @@ class _MyAppState extends State<MyApp> {
       /// Print the results
       _healthDataList.forEach((x) {
         print("Data point: $x");
-        steps += x.value.round();
+        steps += x.value?.round() ?? 0;
       });
 
       print("Steps: $steps");
 
       /// Update the UI to display the results
       setState(() {
-        _state =
-            _healthDataList.isEmpty ? AppState.NO_DATA : AppState.DATA_READY;
+        _state = _healthDataList.isEmpty ? AppState.NO_DATA : AppState.DATA_READY;
       });
     } else {
       print("Authorization not granted");
@@ -99,15 +98,31 @@ class _MyAppState extends State<MyApp> {
     );
   }
 
+
   Widget _contentDataReady() {
     return ListView.builder(
         itemCount: _healthDataList.length,
         itemBuilder: (_, index) {
           HealthDataPoint p = _healthDataList[index];
           return ListTile(
-            title: Text("${p.typeString}: ${p.value ?? p.values.length}"),
+            title: Text("${p.typeString}: ${p.value ?? '${p.values.length} entries'}"),
             trailing: Text('${p.unitString}'),
-            subtitle: Text('${p.dateFrom} - ${p.dateTo}'),
+            subtitle: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text('${p.dateFrom} - ${p.dateTo}'),
+                SizedBox(
+                  height: 10,
+                ),
+                ...p.values.take(5).map((e) {
+                  return Text(
+                    "voltage: ${e['voltage']?.toString() ?? ''} ",
+                    style: TextStyle(color: Colors.lightBlue),
+                  );
+                }),
+                Divider()
+              ],
+            ),
           );
         });
   }
