@@ -1,7 +1,7 @@
-name: health
+name: health_avanced
 description: Wrapper for the iOS HealthKit and Android GoogleFit services.
-version: 3.0.6
-homepage: https://github.com/cph-cachet/flutter-plugins/tree/master/packages/health
+version: 2021.06.30
+homepage: https://gitlab.com/petleo-and-iatros-opensource/health-advanced
 
 environment:
   sdk: ">=2.12.0-0 <3.0.0"
