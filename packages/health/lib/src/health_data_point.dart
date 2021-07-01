@@ -3,7 +3,6 @@ part of '../health.dart';
 /// A [HealthDataPoint] object corresponds to a data point captures from GoogleFit or Apple HealthKit
 class HealthDataPoint {
   num? _value;
-  List _values;
   HealthDataType _type;
   HealthDataUnit _unit;
   DateTime _dateFrom;
@@ -12,6 +11,7 @@ class HealthDataPoint {
   String _deviceId;
   String _sourceId;
   String _sourceName;
+  ECGData? _ecgData;
 
   HealthDataPoint._(
       this._value,
@@ -23,7 +23,7 @@ class HealthDataPoint {
       this._deviceId,
       this._sourceId,
       this._sourceName,
-      [this._values = const []]) {
+      [this._ecgData]) {
     /// Set the value to minutes rather than the category
     /// returned by the native API
     if (type == HealthDataType.MINDFULNESS ||
@@ -43,7 +43,6 @@ class HealthDataPoint {
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
     data['value'] = this.value;
-    data['vaules'] = this.values;
     data['unit'] = this.unit;
     data['date_from'] = this.dateFrom;
     data['date_to'] = this.dateTo;
@@ -55,22 +54,22 @@ class HealthDataPoint {
   }
 
   /// Converts the [HealthDataPoint] to a string
-  String toString() => '${this.runtimeType} - '
-      'value: $value, '
-      'values: $values, '
+  String toString() =>
+      '{value: $value, '
       'unit: $unit, '
       'dateFrom: $dateFrom, '
       'dateTo: $dateTo, '
       'dataType: $type,'
       'platform: $platform'
       'sourceId: $sourceId,'
-      'sourceName: $sourceName,';
+      'sourceName: $sourceName,'
+      'ecg: ${ecgData.toString()}}';
 
   /// Get the quantity value of the data point
   num? get value => _value;
 
-  /// Get the list of values for the data point
-  List get values => _values;
+  /// Get the ECGData for the data point
+  ECGData? get ecgData => _ecgData;
 
   /// Get the start of the datetime interval
   DateTime get dateFrom => _dateFrom;
@@ -112,7 +111,7 @@ class HealthDataPoint {
   bool operator ==(Object o) {
     return o is HealthDataPoint &&
         this.value == o.value &&
-        ListEquality().equals(o.values, values) &&
+        this.ecgData == o.ecgData &&
         this.unit == o.unit &&
         this.dateFrom == o.dateFrom &&
         this.dateTo == o.dateTo &&

@@ -104,8 +104,9 @@ class _MyAppState extends State<MyApp> {
         itemCount: _healthDataList.length,
         itemBuilder: (_, index) {
           HealthDataPoint p = _healthDataList[index];
+          final List<ECGValue>? ecgValues = p.ecgData?.values;
           return ListTile(
-            title: Text("${p.typeString}: ${p.value ?? '${p.values.length} entries'}"),
+            title: Text("${p.typeString}: ${p.value ?? '${p.ecgData?.values?.length} entries'}"),
             trailing: Text('${p.unitString}'),
             subtitle: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -114,9 +115,18 @@ class _MyAppState extends State<MyApp> {
                 SizedBox(
                   height: 10,
                 ),
-                ...p.values.take(5).map((e) {
+                if(ecgValues != null)
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Text("period: ${p.ecgData?.period}"),
+                      Text("interpretation: ${p.ecgData?.interpretation}"),
+                    ],
+                  ),
+                if(ecgValues != null)
+                ...ecgValues.reversed.take(5).map((entry) {
                   return Text(
-                    "voltage: ${e['voltage']?.toString() ?? ''} ",
+                    "voltage: ${entry.voltage ?? ''} ",
                     style: TextStyle(color: Colors.lightBlue),
                   );
                 }),
