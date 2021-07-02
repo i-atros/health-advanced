@@ -111,7 +111,6 @@ class HealthDataPoint {
   bool operator ==(Object o) {
     return o is HealthDataPoint &&
         this.value == o.value &&
-        this.ecgData == o.ecgData &&
         this.unit == o.unit &&
         this.dateFrom == o.dateFrom &&
         this.dateTo == o.dateTo &&
