@@ -27,7 +27,6 @@ class _MyAppState extends State<MyApp> {
     super.initState();
   }
 
-
   Future fetchData() async {
     /// Get everything from midnight until now
     DateTime startDate = DateTime(2020, 11, 07, 0, 0, 0);
@@ -98,41 +97,78 @@ class _MyAppState extends State<MyApp> {
     );
   }
 
-
   Widget _contentDataReady() {
     return ListView.builder(
         itemCount: _healthDataList.length,
         itemBuilder: (_, index) {
           HealthDataPoint p = _healthDataList[index];
           final List<ECGValue>? ecgValues = p.ecgData?.values;
-          return ListTile(
-            title: Text("${p.typeString}: ${p.value ?? '${p.ecgData?.values?.length} entries'}"),
-            trailing: Text('${p.unitString}'),
-            subtitle: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Text('${p.dateFrom} - ${p.dateTo}'),
-                SizedBox(
-                  height: 10,
+          return Column(
+            children: [
+              ListTile(
+                title: Text("${p.typeString}: ${p.value ?? '${p.ecgData?.values?.length} entries'}", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),),
+                trailing: Text('${p.unitString}', style: TextStyle(fontSize: 8),),
+                subtitle: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    SizedBox(height: 10,),
+                    Row(
+                      children: [
+                        Text('From:',style: TextStyle(fontWeight: FontWeight.bold)),
+                        Text('${p.dateFrom}'),
+                      ],
+                    ),
+                    SizedBox(
+                      height: 10,
+                    ),
+                    Row(
+                      children: [
+                        Text('To:',style: TextStyle(fontWeight: FontWeight.bold)),
+                        Text('${p.dateTo}'),
+                      ],
+                    ),
+                    SizedBox(
+                      height: 10,
+                    ),
+                    if (ecgValues != null)
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          Row(
+                            children: [
+                              Text("Period:", style: TextStyle(fontWeight: FontWeight.bold)),
+                              Text("${p.ecgData?.period}"),
+                            ],
+                          ),
+                          SizedBox(height: 10,),
+                          Row(
+                            children: [
+                              Text("Interpretation: ", style: TextStyle(fontWeight: FontWeight.bold)),
+                              Text("${p.ecgData?.interpretation}"),
+                            ],
+                          ),
+                          SizedBox(height: 10,),
+                          if (p.ecgData?.symptoms?.length != 0)
+                            Text(
+                              "${p.ecgData?.symptoms?.length} Symptoms:",
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                          ...?p.ecgData?.symptoms?.map((e) => Text("$e")).toList(),
+                          SizedBox(height: 10,),
+                        ],
+                      ),
+                    if (ecgValues != null)
+                      ...ecgValues.reversed.take(5).map((entry) {
+                        return Text(
+                          "voltage: ${entry.voltage ?? ''} ",
+                          style: TextStyle(color: Colors.lightBlue),
+                        );
+                      }),
+                  ],
                 ),
-                if(ecgValues != null)
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Text("period: ${p.ecgData?.period}"),
-                      Text("interpretation: ${p.ecgData?.interpretation}"),
-                    ],
-                  ),
-                if(ecgValues != null)
-                ...ecgValues.reversed.take(5).map((entry) {
-                  return Text(
-                    "voltage: ${entry.voltage ?? ''} ",
-                    style: TextStyle(color: Colors.lightBlue),
-                  );
-                }),
-                Divider()
-              ],
-            ),
+              ),
+              Divider(color: Colors.black,)
+            ],
           );
         });
   }
@@ -158,8 +194,7 @@ class _MyAppState extends State<MyApp> {
       return _contentNoData();
     else if (_state == AppState.FETCHING_DATA)
       return _contentFetchingData();
-    else if (_state == AppState.AUTH_NOT_GRANTED)
-      return _authorizationNotGranted();
+    else if (_state == AppState.AUTH_NOT_GRANTED) return _authorizationNotGranted();
 
     return _contentNotFetched();
   }

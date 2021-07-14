@@ -179,36 +179,23 @@ public class SwiftHealthPlugin: NSObject, FlutterPlugin {
                                 let period = 1000 / (sample.samplingFrequency?.doubleValue(for: HKUnit.hertz()))!
                                 
                                 let symptoms = self.getAllSymptoms(from: sample)
+                               
                                 
                                 return [
                                     "uuid": "\(sample.uuid)",
                                     "ecg": [
                                         "values": voltages,
                                         "interpretation": sample.classification.rawValue,
-                                        "period": period
+                                        "period": period,
+                                        "symptoms": symptoms
                                     ],
                                     "date_from": Int(sample.startDate.timeIntervalSince1970 * 1000),
-                                    "date_to": Int(sample.endDate.timeIntervalSince1970 * 1000),
+                                    "date_to": Int(sample.endDate.timeIntervalSince1970 * 1000)
                                 ]
                             })
                     }
                     return
                 }
-                return
-                    print(samplesCategory)
-                result(
-                    samplesCategory.map { sample -> NSDictionary in
-                        let unit = self.unitLookUp(key: dataTypeKey)
-                        
-                        return [
-                            "uuid": "\(sample.uuid)",
-                            "value": sample.value,
-                            "date_from": Int(sample.startDate.timeIntervalSince1970 * 1000),
-                            "date_to": Int(sample.endDate.timeIntervalSince1970 * 1000),
-                            "source_id": sample.sourceRevision.source.bundleIdentifier,
-                            "source_name": sample.sourceRevision.source.name
-                        ]
-                    })
                 return
             }
             result(samples.map { sample -> NSDictionary in
@@ -273,16 +260,26 @@ public class SwiftHealthPlugin: NSObject, FlutterPlugin {
             .vomiting,
             .wheezing,
         ]
-        for categoryType in symptomsCategoryTypes {
-            checkIfSymptomIsPresent(from: sample, categoryType: categoryType) {
+        
+        let semaphore = DispatchSemaphore(value: 0)
+        for i in 0...symptomsCategoryTypes.count-1 {
+        
+            print("i:\(i)")
+            checkIfSymptomIsPresent(from: sample, categoryType: symptomsCategoryTypes[i]) {
                 (isPresent: Bool) in
-                if isPresent, let sampleType = HKSampleType.categoryType(forIdentifier: categoryType) {
+                if isPresent, let sampleType = HKSampleType.categoryType(forIdentifier: symptomsCategoryTypes[i]) {
                     print("\(sampleType) is present!")
-                    presentSymptoms.append(categoryType.rawValue)
+                    presentSymptoms.append(symptomsCategoryTypes[i].rawValue)
+                    
+                }
+                
+                if(i==symptomsCategoryTypes.count-1){
+                    semaphore.signal()
                 }
             }
         }
         
+        semaphore.wait()
         return presentSymptoms
     }
     
