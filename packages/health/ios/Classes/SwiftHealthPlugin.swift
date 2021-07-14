@@ -10,6 +10,7 @@ public class SwiftHealthPlugin: NSObject, FlutterPlugin {
     var ecgTypes = Set<HKSampleType>()
     var allDataTypes = Set<HKSampleType>()
     var dataTypesDict: [String: HKSampleType] = [:]
+    var symptomTypesDict: [String: HKSampleType] = [:]
     var unitDict: [String: HKUnit] = [:]
     
     // Health Data Type Keys
@@ -42,6 +43,49 @@ public class SwiftHealthPlugin: NSObject, FlutterPlugin {
     let SLEEP_ASLEEP = "SLEEP_ASLEEP"
     let SLEEP_AWAKE = "SLEEP_AWAKE"
     let ELECTROCARDIOGRAM = "ELECTROCARDIOGRAM"
+    
+    
+    // SYMPTOMS
+    let ABDOMINAL_CRAMPS = "ABDOMINAL_CRAMPS"
+    let ACNE = "ACNE"
+    let APPETITE_CHANGES = "APPETITE_CHANGES"
+    let BLADDER_INCONTINENCE = "BLADDER_INCONTINENCE"
+    let BLOATING = "BLOATING"
+    let BREAST_PAIN = "BREAST_PAIN"
+    let CHEST_TIGHTNESS_OR_PAIN = "CHEST_TIGHTNESS_OR_PAIN"
+    let CHILLS = "CHILLS"
+    let CONSTIPATION = "CONSTIPATION"
+    let COUGHING = "COUGHING"
+    let DIARRHEA = "DIARRHEA"
+    let DIZZINESS = "DIZZINESS"
+    let DRY_SKIN = "DRY_SKIN"
+    let FAINTING = "FAINTING"
+    let FATIGUE = "FATIGUE"
+    let FEVER = "FEVER"
+    let GENERALIZED_BODY_ACHE = "GENERALIZED_BODY_ACHE"
+    let HAIR_LOSS = "HAIR_LOSS"
+    let HEADACHE = "HEADACHE"
+    let HEARTBURN = "HEARTBURN"
+    let HOT_FLASHES = "HOT_FLASHES"
+    let LOSS_OF_SMELL = "LOSS_OF_SMELL"
+    let LOSS_OF_TASTE = "LOSS_OF_TASTE"
+    let LOWER_BACK_PAIN = "LOWER_BACK_PAIN"
+    let MEMORY_LAPSE = "MEMORY_LAPSE"
+    let MOOD_CHANGES = "MOOD_CHANGES"
+    let NAUSEA = "NAUSEA"
+    let NIGHT_SWEATS = "NIGHT_SWEATS"
+    let PELVIC_PAIN = "PELVIC_PAIN"
+    let RAPID_POUNDING_OR_FLUTTERING_HEARTBEAT = "RAPID_POUNDING_OR_FLUTTERING_HEARTBEAT"
+    let RUNNY_NOSE = "RUNNY_NOSE"
+    let SHORTNESS_OF_BREATH = "SHORTNESS_OF_BREATH"
+    let SINUS_CONGESTION = "SINUS_CONGESTION"
+    let SKIPPED_HEARTBEAT = "SKIPPED_HEARTBEAT"
+    let SLEEP_CHANGES = "SLEEP_CHANGES"
+    let SORE_THROAT = "SORE_THROAT"
+    let VAGINAL_DRYNESS = "VAGINAL_DRYNESS"
+    let VOMITING = "VOMITING"
+    let WHEEZING = "WHEEZING"
+    
     
     public static func register(with registrar: FlutterPluginRegistrar) {
         let channel = FlutterMethodChannel(
@@ -81,6 +125,12 @@ public class SwiftHealthPlugin: NSObject, FlutterPlugin {
         for key in types {
             let keyString = "\(key)"
             typesToRequest.insert(dataTypeLookUp(key: keyString))
+            
+            if keyString == "ELECTROCARDIOGRAM" {
+                symptomTypesDict.forEach { (key: String, value: HKSampleType) in
+                    typesToRequest.insert(value)
+                }
+            }
         }
         
         if #available(iOS 11.0, *) {
@@ -128,6 +178,8 @@ public class SwiftHealthPlugin: NSObject, FlutterPlugin {
                                 let voltages = self.getVoltages(sample: sample)
                                 let period = 1000 / (sample.samplingFrequency?.doubleValue(for: HKUnit.hertz()))!
                                 
+                                let symptoms = self.getAllSymptoms(from: sample)
+                                
                                 return [
                                     "uuid": "\(sample.uuid)",
                                     "ecg": [
@@ -173,6 +225,93 @@ public class SwiftHealthPlugin: NSObject, FlutterPlugin {
             })
             return}
         healthStore.execute(query)
+    }
+    
+    @available(iOS 14.0, *)
+    func getAllSymptoms(from sample: HKElectrocardiogram) -> [String] {
+        
+        var presentSymptoms: [String] = []
+        
+        let symptomsCategoryTypes: [HKCategoryTypeIdentifier] =  [
+            .abdominalCramps,
+            .acne,
+            .appetiteChanges,
+            .bladderIncontinence,
+            .bloating,
+            .breastPain,
+            .chestTightnessOrPain,
+            .chills,
+            .constipation,
+            .coughing,
+            .diarrhea,
+            .dizziness,
+            .drySkin,
+            .fainting,
+            .fatigue,
+            .fever,
+            .generalizedBodyAche,
+            .hairLoss,
+            .headache,
+            .heartburn,
+            .hotFlashes,
+            .lossOfSmell,
+            .lossOfTaste,
+            .lowerBackPain,
+            .memoryLapse,
+            .moodChanges,
+            .nausea,
+            .nightSweats,
+            .pelvicPain,
+            .rapidPoundingOrFlutteringHeartbeat,
+            .runnyNose,
+            .shortnessOfBreath,
+            .sinusCongestion,
+            .skippedHeartbeat,
+            .sleepChanges,
+            .soreThroat,
+            .vaginalDryness,
+            .vomiting,
+            .wheezing,
+        ]
+        for categoryType in symptomsCategoryTypes {
+            checkIfSymptomIsPresent(from: sample, categoryType: categoryType) {
+                (isPresent: Bool) in
+                if isPresent, let sampleType = HKSampleType.categoryType(forIdentifier: categoryType) {
+                    print("\(sampleType) is present!")
+                    presentSymptoms.append(categoryType.rawValue)
+                }
+            }
+        }
+        
+        return presentSymptoms
+    }
+    
+    @available(iOS 14.0, *)
+    func checkIfSymptomIsPresent(from sample: HKElectrocardiogram,
+                                 categoryType: HKCategoryTypeIdentifier,
+                                 completion: @escaping (Bool)->Void){
+        guard sample.symptomsStatus == .present,
+              let sampleType = HKSampleType.categoryType(forIdentifier: categoryType) else {
+            completion(false)
+            return
+        }
+        let predicate = HKQuery.predicateForObjectsAssociated(electrocardiogram: sample)
+        let sampleQuery = HKSampleQuery(
+            sampleType: sampleType,
+            predicate: predicate,
+            limit: HKObjectQueryNoLimit,
+            sortDescriptors: nil) { (query, samples, error) in
+            
+            if let sample = samples?.first,
+               let categorySample = sample as? HKCategorySample {
+                print("\(sampleType) \(categorySample.sampleType): \(categorySample.value )")
+                completion(true)
+            } else {
+                completion(false)
+            }
+        }
+        
+        healthStore.execute(sampleQuery)
     }
     
     func getVoltages(sample: HKSample) -> [[String: Double]] {
@@ -308,6 +447,48 @@ public class SwiftHealthPlugin: NSObject, FlutterPlugin {
         
         if #available(iOS 14.0, *) {
             dataTypesDict[ELECTROCARDIOGRAM] = HKObjectType.electrocardiogramType()
+            
+            
+            // SYMPTOMS
+            symptomTypesDict[ABDOMINAL_CRAMPS] = HKSampleType.categoryType(forIdentifier: .abdominalCramps)!
+            symptomTypesDict[ACNE] = HKSampleType.categoryType(forIdentifier: .acne)!
+            symptomTypesDict[APPETITE_CHANGES] = HKSampleType.categoryType(forIdentifier: .appetiteChanges)!
+            symptomTypesDict[BLADDER_INCONTINENCE] = HKSampleType.categoryType(forIdentifier: .bladderIncontinence)!
+            symptomTypesDict[BLOATING] = HKSampleType.categoryType(forIdentifier: .bloating)!
+            symptomTypesDict[BREAST_PAIN] = HKSampleType.categoryType(forIdentifier: .breastPain)!
+            symptomTypesDict[CHEST_TIGHTNESS_OR_PAIN] = HKSampleType.categoryType(forIdentifier: .chestTightnessOrPain)!
+            symptomTypesDict[CHILLS] = HKSampleType.categoryType(forIdentifier: .chills)!
+            symptomTypesDict[CONSTIPATION] = HKSampleType.categoryType(forIdentifier: .constipation)!
+            symptomTypesDict[COUGHING] = HKSampleType.categoryType(forIdentifier: .coughing)!
+            symptomTypesDict[DIARRHEA] = HKSampleType.categoryType(forIdentifier: .diarrhea)!
+            symptomTypesDict[DIZZINESS] = HKSampleType.categoryType(forIdentifier: .dizziness)!
+            symptomTypesDict[DRY_SKIN] = HKSampleType.categoryType(forIdentifier: .drySkin)!
+            symptomTypesDict[FAINTING] = HKSampleType.categoryType(forIdentifier: .fainting)!
+            symptomTypesDict[FATIGUE] = HKSampleType.categoryType(forIdentifier: .fatigue)!
+            symptomTypesDict[FEVER] = HKSampleType.categoryType(forIdentifier: .fever)!
+            symptomTypesDict[GENERALIZED_BODY_ACHE] = HKSampleType.categoryType(forIdentifier: .generalizedBodyAche)!
+            symptomTypesDict[HAIR_LOSS] = HKSampleType.categoryType(forIdentifier: .hairLoss)!
+            symptomTypesDict[HEADACHE] = HKSampleType.categoryType(forIdentifier: .headache)!
+            symptomTypesDict[HEARTBURN] = HKSampleType.categoryType(forIdentifier: .heartburn)!
+            symptomTypesDict[HOT_FLASHES] = HKSampleType.categoryType(forIdentifier: .hotFlashes)!
+            symptomTypesDict[LOSS_OF_SMELL] = HKSampleType.categoryType(forIdentifier: .lossOfSmell)!
+            symptomTypesDict[LOSS_OF_TASTE] = HKSampleType.categoryType(forIdentifier: .lossOfTaste)!
+            symptomTypesDict[LOWER_BACK_PAIN] = HKSampleType.categoryType(forIdentifier: .lowerBackPain)!
+            symptomTypesDict[MEMORY_LAPSE] = HKSampleType.categoryType(forIdentifier: .moodChanges)!
+            symptomTypesDict[MOOD_CHANGES] = HKSampleType.categoryType(forIdentifier: .moodChanges)!
+            symptomTypesDict[NAUSEA] = HKSampleType.categoryType(forIdentifier: .nausea)!
+            symptomTypesDict[NIGHT_SWEATS] = HKSampleType.categoryType(forIdentifier: .nightSweats)!
+            symptomTypesDict[PELVIC_PAIN] = HKSampleType.categoryType(forIdentifier: .pelvicPain)!
+            symptomTypesDict[RAPID_POUNDING_OR_FLUTTERING_HEARTBEAT] = HKSampleType.categoryType(forIdentifier: .rapidPoundingOrFlutteringHeartbeat)!
+            symptomTypesDict[RUNNY_NOSE] = HKSampleType.categoryType(forIdentifier: .runnyNose)!
+            symptomTypesDict[SHORTNESS_OF_BREATH] = HKSampleType.categoryType(forIdentifier: .shortnessOfBreath)!
+            symptomTypesDict[SINUS_CONGESTION] = HKSampleType.categoryType(forIdentifier: .sinusCongestion)!
+            symptomTypesDict[SKIPPED_HEARTBEAT] = HKSampleType.categoryType(forIdentifier: .skippedHeartbeat)!
+            symptomTypesDict[SLEEP_CHANGES] = HKSampleType.categoryType(forIdentifier: .sleepChanges)!
+            symptomTypesDict[SORE_THROAT] = HKSampleType.categoryType(forIdentifier: .soreThroat)!
+            symptomTypesDict[VAGINAL_DRYNESS] = HKSampleType.categoryType(forIdentifier: .vaginalDryness)!
+            symptomTypesDict[VOMITING] = HKSampleType.categoryType(forIdentifier: .vomiting)!
+            symptomTypesDict[WHEEZING] = HKSampleType.categoryType(forIdentifier: .wheezing)!
             
             ecgTypes = Set([HKObjectType.electrocardiogramType()])
         }
