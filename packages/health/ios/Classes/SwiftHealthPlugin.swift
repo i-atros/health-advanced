@@ -179,7 +179,7 @@ public class SwiftHealthPlugin: NSObject, FlutterPlugin {
                                 let period = 1000 / (sample.samplingFrequency?.doubleValue(for: HKUnit.hertz()))!
                                 
                                 let symptoms = self.getAllSymptoms(from: sample)
-                               
+                                
                                 
                                 return [
                                     "uuid": "\(sample.uuid)",
@@ -263,17 +263,13 @@ public class SwiftHealthPlugin: NSObject, FlutterPlugin {
         
         let semaphore = DispatchSemaphore(value: 0)
         for i in 0...symptomsCategoryTypes.count-1 {
-        
-            print("i:\(i)")
             checkIfSymptomIsPresent(from: sample, categoryType: symptomsCategoryTypes[i]) {
                 (isPresent: Bool) in
-                if isPresent, let sampleType = HKSampleType.categoryType(forIdentifier: symptomsCategoryTypes[i]) {
-                    print("\(sampleType) is present!")
+                if isPresent{
                     presentSymptoms.append(symptomsCategoryTypes[i].rawValue)
-                    
                 }
                 
-                if(i==symptomsCategoryTypes.count-1){
+                if (i==symptomsCategoryTypes.count-1) {
                     semaphore.signal()
                 }
             }
