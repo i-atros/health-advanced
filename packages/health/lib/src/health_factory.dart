@@ -12,6 +12,24 @@ class HealthFactory {
   bool _isDataTypeAvailable(HealthDataType dataType) =>
       _platformType == PlatformType.ANDROID ? _dataTypeKeysAndroid.contains(dataType) : _dataTypeKeysIOS.contains(dataType);
 
+  Future<bool> hasPermissions(List<HealthDataType> types) async {
+    /// If BMI is requested, then also ask for weight and height
+    if (types.contains(HealthDataType.BODY_MASS_INDEX)) {
+      if (!types.contains(HealthDataType.WEIGHT)) {
+        types.add(HealthDataType.WEIGHT);
+      }
+
+      if (!types.contains(HealthDataType.HEIGHT)) {
+        types.add(HealthDataType.HEIGHT);
+      }
+    }
+
+    List<String> keys = types.map((e) => _enumToString(e)).toList();
+    final bool hasPermissions =
+    await _channel.invokeMethod('hasPermissions', {'types': keys});
+    return hasPermissions;
+  }
+
   /// Request access to GoogleFit/Apple HealthKit
   Future<bool> requestAuthorization(List<HealthDataType> types) async {
     /// If BMI is requested, then also ask for weight and height
