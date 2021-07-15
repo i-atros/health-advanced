@@ -164,7 +164,6 @@ public class SwiftHealthPlugin: NSObject, FlutterPlugin {
             sortDescriptors: [sortDescriptor]
         ) {
             x, samplesOrNil, error in
-            
             guard let samples = samplesOrNil as? [HKQuantitySample] else {
                 guard let samplesCategory = samplesOrNil as? [HKCategorySample] else {
                     if #available(iOS 14.0, *) {
