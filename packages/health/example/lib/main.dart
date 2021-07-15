@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:health/health.dart';
@@ -40,8 +41,12 @@ class _MyAppState extends State<MyApp> {
       HealthDataType.WEIGHT,
       HealthDataType.HEIGHT,
       HealthDataType.BLOOD_GLUCOSE,
-      HealthDataType.DISTANCE_WALKING_RUNNING,
-      HealthDataType.ELECTROCARDIOGRAM,
+      if(Platform.isAndroid)
+        HealthDataType.DISTANCE_DELTA,
+      if(Platform.isIOS)
+        HealthDataType.DISTANCE_WALKING_RUNNING,
+      if(Platform.isIOS)
+        HealthDataType.ELECTROCARDIOGRAM,
     ];
 
     setState(() => _state = AppState.FETCHING_DATA);
