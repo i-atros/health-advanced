@@ -126,11 +126,11 @@ public class SwiftHealthPlugin: NSObject, FlutterPlugin {
             let keyString = "\(key)"
             typesToRequest.insert(dataTypeLookUp(key: keyString))
             
-            if keyString == "ELECTROCARDIOGRAM" {
+            /*if keyString == "ELECTROCARDIOGRAM" {
                 symptomTypesDict.forEach { (key: String, value: HKSampleType) in
                     typesToRequest.insert(value)
                 }
-            }
+            }*/
         }
         
         if #available(iOS 11.0, *) {
@@ -178,8 +178,7 @@ public class SwiftHealthPlugin: NSObject, FlutterPlugin {
                                 let voltages = self.getVoltages(sample: sample)
                                 let period = 1000 / (sample.samplingFrequency?.doubleValue(for: HKUnit.hertz()))!
                                 
-                                let symptoms = self.getAllSymptoms(from: sample)
-                                
+                                //let symptoms = self.getAllSymptoms(from: sample)
                                 
                                 return [
                                     "uuid": "\(sample.uuid)",
@@ -187,7 +186,7 @@ public class SwiftHealthPlugin: NSObject, FlutterPlugin {
                                         "values": voltages,
                                         "interpretation": sample.classification.rawValue,
                                         "period": period,
-                                        "symptoms": symptoms
+                                        //"symptoms": symptoms
                                     ],
                                     "date_from": Int(sample.startDate.timeIntervalSince1970 * 1000),
                                     "date_to": Int(sample.endDate.timeIntervalSince1970 * 1000)

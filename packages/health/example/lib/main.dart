@@ -148,7 +148,7 @@ class _MyAppState extends State<MyApp> {
                             ],
                           ),
                           SizedBox(height: 10,),
-                          if (p.ecgData?.symptoms?.length != 0)
+                          if (p.ecgData?.symptoms != null)
                             Text(
                               "${p.ecgData?.symptoms?.length} Symptoms:",
                               style: TextStyle(fontWeight: FontWeight.bold),
