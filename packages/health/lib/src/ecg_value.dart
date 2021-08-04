@@ -9,6 +9,8 @@ class ECGValue {
   double? voltage;
   double? timeSinceStart;
 
+  int get inMicroVolts => voltage != null ? (voltage! * pow(10,6)).toInt() : 0;
+
   factory ECGValue.fromRawJson(String str) => ECGValue.fromJson(json.decode(str));
 
   String toRawJson() => json.encode(toJson());
