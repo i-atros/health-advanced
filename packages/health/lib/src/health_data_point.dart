@@ -50,6 +50,8 @@ class HealthDataPoint {
     data['platform_type'] = this.platform;
     data['source_id'] = this.sourceId;
     data['source_name'] = this.sourceName;
+
+    print(data.toString());
     return data;
   }
 
@@ -123,5 +125,5 @@ class HealthDataPoint {
 
   /// Override required due to overriding the '==' operator
   @override
-  int get hashCode => toJson().hashCode;
+  int get hashCode => toJson().toString().hashCode;
 }
