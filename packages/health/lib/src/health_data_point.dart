@@ -51,7 +51,6 @@ class HealthDataPoint {
     data['source_id'] = this.sourceId;
     data['source_name'] = this.sourceName;
 
-    print(data.toString());
     return data;
   }
 
