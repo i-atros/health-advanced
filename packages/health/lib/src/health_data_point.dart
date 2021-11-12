@@ -34,6 +34,25 @@ class HealthDataPoint {
     }
   }
 
+  @visibleForTesting
+  HealthDataPoint.private(this._value,
+      this._type,
+      this._unit,
+      this._dateFrom,
+      this._dateTo,
+      this._platform,
+      this._deviceId,
+      this._sourceId,
+      this._sourceName,
+      [this._ecgData]) {
+    if (type == HealthDataType.MINDFULNESS ||
+        type == HealthDataType.SLEEP_IN_BED ||
+        type == HealthDataType.SLEEP_ASLEEP ||
+        type == HealthDataType.SLEEP_AWAKE) {
+      this._value = _convertMinutes();
+    }
+  }
+
   double _convertMinutes() {
     int ms = dateTo.millisecondsSinceEpoch - dateFrom.millisecondsSinceEpoch;
     return ms / (1000 * 60);
