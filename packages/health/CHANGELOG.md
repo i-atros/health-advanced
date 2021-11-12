@@ -1,3 +1,9 @@
+## 4.0.1
+* Expose `HealthDataPoint` constructor for testing
+
+## 4.0.0
+* Get raw ECG from Apple 
+
 ## 3.0.6
 * [PR#281](https://github.com/cph-cachet/flutter-plugins/pull/281) Added two new fields to the `HealthDataPoint` - `SourceId` and `SourceName` and populate when data is read. This allows datapoints to be disambigous and in some cases allows us to get more accurate data. For example the number of steps can be reported from Apple Health and Watch and without source data they are aggregated into just "steps" producing an innacurate result.
 
