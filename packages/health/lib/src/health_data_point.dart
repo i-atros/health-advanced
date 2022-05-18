@@ -13,16 +13,21 @@ class HealthDataPoint {
   String _sourceName;
   ECGData? _ecgData;
 
+  HealthDataPoint(
+      this._value, this._type, this._unit, this._dateFrom, this._dateTo, this._platform, this._deviceId, this._sourceId, this._sourceName,
+      [this._ecgData]) {
+    /// Set the value to minutes rather than the category
+    /// returned by the native API
+    if (type == HealthDataType.MINDFULNESS ||
+        type == HealthDataType.SLEEP_IN_BED ||
+        type == HealthDataType.SLEEP_ASLEEP ||
+        type == HealthDataType.SLEEP_AWAKE) {
+      this._value = _convertMinutes();
+    }
+  }
+
   HealthDataPoint._(
-      this._value,
-      this._type,
-      this._unit,
-      this._dateFrom,
-      this._dateTo,
-      this._platform,
-      this._deviceId,
-      this._sourceId,
-      this._sourceName,
+      this._value, this._type, this._unit, this._dateFrom, this._dateTo, this._platform, this._deviceId, this._sourceId, this._sourceName,
       [this._ecgData]) {
     /// Set the value to minutes rather than the category
     /// returned by the native API
@@ -35,15 +40,8 @@ class HealthDataPoint {
   }
 
   @visibleForTesting
-  HealthDataPoint.private(this._value,
-      this._type,
-      this._unit,
-      this._dateFrom,
-      this._dateTo,
-      this._platform,
-      this._deviceId,
-      this._sourceId,
-      this._sourceName,
+  HealthDataPoint.private(
+      this._value, this._type, this._unit, this._dateFrom, this._dateTo, this._platform, this._deviceId, this._sourceId, this._sourceName,
       [this._ecgData]) {
     if (type == HealthDataType.MINDFULNESS ||
         type == HealthDataType.SLEEP_IN_BED ||
@@ -52,6 +50,31 @@ class HealthDataPoint {
       this._value = _convertMinutes();
     }
   }
+
+  HealthDataPoint copyWith({
+    num? value,
+    HealthDataType? type,
+    HealthDataUnit? unit,
+    DateTime? dateFrom,
+    DateTime? dateTo,
+    PlatformType? platform,
+    String? deviceId,
+    String? sourceId,
+    String? sourceName,
+    ECGData? ecgData,
+  }) =>
+      HealthDataPoint(
+        value ?? this._value,
+        type ?? this._type,
+        unit ?? this._unit,
+        dateFrom ?? this._dateFrom,
+        dateTo ?? this._dateTo,
+        platform ?? this._platform,
+        deviceId ?? this._deviceId,
+        sourceId ?? this._sourceId,
+        sourceName ?? this._sourceName,
+        ecgData ?? this._ecgData,
+      );
 
   double _convertMinutes() {
     int ms = dateTo.millisecondsSinceEpoch - dateFrom.millisecondsSinceEpoch;
@@ -74,8 +97,7 @@ class HealthDataPoint {
   }
 
   /// Converts the [HealthDataPoint] to a string
-  String toString() =>
-      '{value: $value, '
+  String toString() => '{value: $value, '
       'unit: $unit, '
       'dateFrom: $dateFrom, '
       'dateTo: $dateTo, '
