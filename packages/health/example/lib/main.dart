@@ -152,6 +152,12 @@ class _MyAppState extends State<MyApp> {
                               Text("${p.ecgData?.interpretation}"),
                             ],
                           ),
+                          Row(
+                            children: [
+                              Text("Average Heart Rate: ", style: TextStyle(fontWeight: FontWeight.bold)),
+                              Text("${p.ecgData?.averageHearthRate}"),
+                            ],
+                          ),
                           SizedBox(height: 10,),
                           if (p.ecgData?.symptoms != null)
                             Text(

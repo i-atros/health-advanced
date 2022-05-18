@@ -185,6 +185,7 @@ public class SwiftHealthPlugin: NSObject, FlutterPlugin {
                                         "values": voltages,
                                         "interpretation": sample.classification.rawValue,
                                         "period": period,
+                                        "average_heart_rate": sample.averageHeartRate?.doubleValue(for: HKUnit.count().unitDivided(by: .minute())) ?? 0,
                                         //"symptoms": symptoms
                                     ],
                                     "date_from": Int(sample.startDate.timeIntervalSince1970 * 1000),
