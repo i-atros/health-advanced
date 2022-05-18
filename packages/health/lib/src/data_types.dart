@@ -95,6 +95,7 @@ const List<HealthDataType> _dataTypeKeysAndroid = [
 
 /// Map a [HealthDataType] to a [HealthDataUnit].
 const Map<HealthDataType, HealthDataUnit> _dataTypeToUnit = {
+  HealthDataType.AVERAGE_HEART_RATE: HealthDataUnit.BEATS_PER_MINUTE,
   HealthDataType.ACTIVE_ENERGY_BURNED: HealthDataUnit.CALORIES,
   HealthDataType.BASAL_ENERGY_BURNED: HealthDataUnit.CALORIES,
   HealthDataType.BLOOD_GLUCOSE: HealthDataUnit.MILLIGRAM_PER_DECILITER,
