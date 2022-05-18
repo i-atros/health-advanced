@@ -37,6 +37,7 @@ enum HealthDataType {
 
   // ECG type (specific to Apple Watch)
   ELECTROCARDIOGRAM,
+  AVERAGE_HEART_RATE,
 }
 
 /// List of data types available on iOS
