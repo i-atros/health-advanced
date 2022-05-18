@@ -42,6 +42,7 @@ enum HealthDataType {
 
 /// List of data types available on iOS
 const List<HealthDataType> _dataTypeKeysIOS = [
+  HealthDataType.AVERAGE_HEART_RATE,
   HealthDataType.ACTIVE_ENERGY_BURNED,
   HealthDataType.BASAL_ENERGY_BURNED,
   HealthDataType.BLOOD_GLUCOSE,
