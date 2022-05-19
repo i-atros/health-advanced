@@ -127,10 +127,10 @@ public class SwiftHealthPlugin: NSObject, FlutterPlugin {
             typesToRequest.insert(dataTypeLookUp(key: keyString))
             
             /*if keyString == "ELECTROCARDIOGRAM" {
-                symptomTypesDict.forEach { (key: String, value: HKSampleType) in
-                    typesToRequest.insert(value)
-                }
-            }*/
+             symptomTypesDict.forEach { (key: String, value: HKSampleType) in
+             typesToRequest.insert(value)
+             }
+             }*/
         }
         
         if #available(iOS 11.0, *) {
@@ -179,18 +179,25 @@ public class SwiftHealthPlugin: NSObject, FlutterPlugin {
                                 
                                 //let symptoms = self.getAllSymptoms(from: sample)
                                 
-                                return [
+                                let ecgDictionary: NSMutableDictionary = [
+                                    "values": voltages,
+                                    "interpretation": sample.classification.rawValue,
+                                    "period": period,
+                                    //"symptoms": symptoms
+                                ]
+                                
+                                if let averageHeartRate = sample.averageHeartRate?.doubleValue(for: HKUnit.count().unitDivided(by: .minute())) {
+                                    ecgDictionary["average_heart_rate"] = averageHeartRate
+                                }
+                                
+                                let sampleDictionary: NSMutableDictionary = [
                                     "uuid": "\(sample.uuid)",
-                                    "ecg": [
-                                        "values": voltages,
-                                        "interpretation": sample.classification.rawValue,
-                                        "period": period,
-                                        "average_heart_rate": sample.averageHeartRate?.doubleValue(for: HKUnit.count().unitDivided(by: .minute())) ?? 0,
-                                        //"symptoms": symptoms
-                                    ],
+                                    "ecg": ecgDictionary,
                                     "date_from": Int(sample.startDate.timeIntervalSince1970 * 1000),
                                     "date_to": Int(sample.endDate.timeIntervalSince1970 * 1000)
                                 ]
+                                
+                                return sampleDictionary
                             })
                     }
                     return
@@ -293,15 +300,15 @@ public class SwiftHealthPlugin: NSObject, FlutterPlugin {
             predicate: predicate,
             limit: HKObjectQueryNoLimit,
             sortDescriptors: nil) { (query, samples, error) in
-            
-            if let sample = samples?.first,
-               let categorySample = sample as? HKCategorySample {
-                print("\(sampleType) \(categorySample.sampleType): \(categorySample.value )")
-                completion(true)
-            } else {
-                completion(false)
+                
+                if let sample = samples?.first,
+                   let categorySample = sample as? HKCategorySample {
+                    print("\(sampleType) \(categorySample.sampleType): \(categorySample.value )")
+                    completion(true)
+                } else {
+                    completion(false)
+                }
             }
-        }
         
         healthStore.execute(sampleQuery)
     }
