@@ -25,7 +25,7 @@ class ECGData {
             json['values'] == null ? null : List<ECGValue>.from(json['values'].map((x) => ECGValue.fromJson(Map<String, dynamic>.from(x)))),
         interpretation: json['interpretation'] == null ? null : json['interpretation'],
         symptoms: json['symptoms'] == null ? null : List<String>.from(json['symptoms'].map((x) => x)),
-        averageHeartRate: json['average_heart_rate'] == null ? null : json['average_heart_rate'],
+        averageHeartRate: json['average_heart_rate'] == null ? null : json['average_heart_rate'].toDouble(),
       );
 
   Map<String, dynamic> toJson() => {
