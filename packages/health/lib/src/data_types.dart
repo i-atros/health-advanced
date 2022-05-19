@@ -37,12 +37,12 @@ enum HealthDataType {
 
   // ECG type (specific to Apple Watch)
   ELECTROCARDIOGRAM,
-  AVERAGE_HEART_RATE,
+  HEART_RATE_AVERAGE_ECG,
 }
 
 /// List of data types available on iOS
 const List<HealthDataType> _dataTypeKeysIOS = [
-  HealthDataType.AVERAGE_HEART_RATE,
+  HealthDataType.HEART_RATE_AVERAGE_ECG,
   HealthDataType.ACTIVE_ENERGY_BURNED,
   HealthDataType.BASAL_ENERGY_BURNED,
   HealthDataType.BLOOD_GLUCOSE,
@@ -95,7 +95,7 @@ const List<HealthDataType> _dataTypeKeysAndroid = [
 
 /// Map a [HealthDataType] to a [HealthDataUnit].
 const Map<HealthDataType, HealthDataUnit> _dataTypeToUnit = {
-  HealthDataType.AVERAGE_HEART_RATE: HealthDataUnit.BEATS_PER_MINUTE,
+  HealthDataType.HEART_RATE_AVERAGE_ECG: HealthDataUnit.BEATS_PER_MINUTE,
   HealthDataType.ACTIVE_ENERGY_BURNED: HealthDataUnit.CALORIES,
   HealthDataType.BASAL_ENERGY_BURNED: HealthDataUnit.CALORIES,
   HealthDataType.BLOOD_GLUCOSE: HealthDataUnit.MILLIGRAM_PER_DECILITER,
