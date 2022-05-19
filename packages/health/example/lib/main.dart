@@ -155,7 +155,7 @@ class _MyAppState extends State<MyApp> {
                           Row(
                             children: [
                               Text("Average Heart Rate: ", style: TextStyle(fontWeight: FontWeight.bold)),
-                              Text("${p.ecgData?.averageHearthRate}"),
+                              Text("${p.ecgData?.averageHeartRate}"),
                             ],
                           ),
                           SizedBox(height: 10,),
