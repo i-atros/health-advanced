@@ -23,6 +23,8 @@ class HealthDataPoint {
         type == HealthDataType.SLEEP_ASLEEP ||
         type == HealthDataType.SLEEP_AWAKE) {
       this._value = _convertMinutes();
+    } else if (type == HealthDataType.BLOOD_OXYGEN) {
+      this._value = _convertBloodSaturationIfNeeded();
     }
   }
 
