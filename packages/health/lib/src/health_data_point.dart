@@ -37,7 +37,7 @@ class HealthDataPoint {
         type == HealthDataType.SLEEP_AWAKE) {
       this._value = _convertMinutes();
     } else if (type == HealthDataType.BLOOD_OXYGEN) {
-      _convertBloodSaturationIfNeeded();
+      this._value = _convertBloodSaturationIfNeeded();
     }
   }
 
@@ -51,7 +51,7 @@ class HealthDataPoint {
         type == HealthDataType.SLEEP_AWAKE) {
       this._value = _convertMinutes();
     } else if (type == HealthDataType.BLOOD_OXYGEN) {
-      _convertBloodSaturationIfNeeded();
+      this._value = _convertBloodSaturationIfNeeded();
     }
   }
 
