@@ -88,7 +88,7 @@ class HealthDataPoint {
   }
 
   num? _convertBloodSaturationIfNeeded() {
-    if (sourceId == 'com.apple.health' && this.value != null) {
+    if (sourceId == 'com.apple.Health' && this.value != null) {
       return this.value! * 100;
     }
 
