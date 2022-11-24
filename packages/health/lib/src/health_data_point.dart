@@ -36,6 +36,8 @@ class HealthDataPoint {
         type == HealthDataType.SLEEP_ASLEEP ||
         type == HealthDataType.SLEEP_AWAKE) {
       this._value = _convertMinutes();
+    } else if (type == HealthDataType.BLOOD_OXYGEN) {
+      _convertBloodSaturationIfNeeded();
     }
   }
 
@@ -48,9 +50,8 @@ class HealthDataPoint {
         type == HealthDataType.SLEEP_ASLEEP ||
         type == HealthDataType.SLEEP_AWAKE) {
       this._value = _convertMinutes();
-    }
-    if (type == HealthDataType.BLOOD_OXYGEN && sourceId == 'com.apple.health') {
-      this._value = this._value != null ? this._value! * 100 : null;
+    } else if (type == HealthDataType.BLOOD_OXYGEN) {
+      _convertBloodSaturationIfNeeded();
     }
   }
 
@@ -82,6 +83,14 @@ class HealthDataPoint {
   double _convertMinutes() {
     int ms = dateTo.millisecondsSinceEpoch - dateFrom.millisecondsSinceEpoch;
     return ms / (1000 * 60);
+  }
+
+  num? _convertBloodSaturationIfNeeded() {
+    if (sourceId == 'com.apple.health' && this.value != null) {
+      return this.value! * 100;
+    }
+
+    return this.value;
   }
 
   /// Converts the [HealthDataPoint] to a json object
