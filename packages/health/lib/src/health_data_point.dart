@@ -49,6 +49,9 @@ class HealthDataPoint {
         type == HealthDataType.SLEEP_AWAKE) {
       this._value = _convertMinutes();
     }
+    if (type == HealthDataType.BLOOD_OXYGEN && sourceId == 'com.apple.health') {
+      this._value = this._value != null ? this._value! * 100 : null;
+    }
   }
 
   HealthDataPoint copyWith({
