@@ -88,7 +88,7 @@ class HealthDataPoint {
   }
 
   num? _convertBloodSaturationIfNeeded() {
-    if (this.value != null && this.value <= 1) {
+    if (this.value != null && this.value! <= 1) {
       return this.value! * 100;
     }
 
