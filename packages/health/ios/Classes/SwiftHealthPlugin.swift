@@ -230,8 +230,6 @@ public class SwiftHealthPlugin: NSObject, FlutterPlugin {
         let startDate = (arguments?["startDate"] as? NSNumber) ?? 0
         let endDate = (arguments?["endDate"] as? NSNumber) ?? 0
         let healthStore = HKHealthStore()
-        
-        NSLog("dataUnitKey: \(dataUnitKey)")
 
         // Convert dates from milliseconds to Date()
         let dateFrom = Date(timeIntervalSince1970: startDate.doubleValue / 1000)
@@ -242,8 +240,6 @@ public class SwiftHealthPlugin: NSObject, FlutterPlugin {
         if let dataUnitKey = dataUnitKey {
             unit = unitDict[dataUnitKey]
         }
-        
-        NSLog("unit: \(unit)")
 
         let predicate = HKQuery.predicateForSamples(
             withStart: dateFrom, end: dateTo, options: .strictStartDate)
