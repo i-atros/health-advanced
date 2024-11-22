@@ -24,6 +24,7 @@ public class SwiftHealthPlugin: NSObject, FlutterPlugin {
     let BODY_MASS_INDEX = "BODY_MASS_INDEX"
     let BODY_TEMPERATURE = "BODY_TEMPERATURE"
     let ELECTRODERMAL_ACTIVITY = "ELECTRODERMAL_ACTIVITY"
+    let SIEMENS = "SIEMENS"
     let HEART_RATE = "HEART_RATE"
     let HEART_RATE_VARIABILITY_SDNN = "HEART_RATE_VARIABILITY_SDNN"
     let HEIGHT = "HEIGHT"
@@ -43,7 +44,28 @@ public class SwiftHealthPlugin: NSObject, FlutterPlugin {
     let SLEEP_ASLEEP = "SLEEP_ASLEEP"
     let SLEEP_AWAKE = "SLEEP_AWAKE"
     let ELECTROCARDIOGRAM = "ELECTROCARDIOGRAM"
+    let FORCED_EXPIRATORY_VOLUME = "FORCED_EXPIRATORY_VOLUME"
+    let INSULIN_DELIVERY = "INSULIN_DELIVERY"
+    let RESPIRATORY_RATE = "RESPIRATORY_RATE"
+    let PERIPHERAL_PERFUSION_INDEX = "PERIPHERAL_PERFUSION_INDEX"
+    let DISTANCE_SWIMMING = "DISTANCE_SWIMMING"
+    let DISTANCE_CYCLING = "DISTANCE_CYCLING"
+    let SLEEP_DEEP = "SLEEP_DEEP"
+    let SLEEP_LIGHT = "SLEEP_LIGHT"
+    let SLEEP_REM = "SLEEP_REM"
     
+    let EXERCISE_TIME = "EXERCISE_TIME"
+    let WORKOUT = "WORKOUT"
+    let HEADACHE_UNSPECIFIED = "HEADACHE_UNSPECIFIED"
+    let HEADACHE_NOT_PRESENT = "HEADACHE_NOT_PRESENT"
+    let HEADACHE_MILD = "HEADACHE_MILD"
+    let HEADACHE_MODERATE = "HEADACHE_MODERATE"
+    let HEADACHE_SEVERE = "HEADACHE_SEVERE"
+    let NUTRITION = "NUTRITION"
+    let BIRTH_DATE = "BIRTH_DATE"
+    let GENDER = "GENDER"
+    let BLOOD_TYPE = "BLOOD_TYPE"
+    let MENSTRUATION_FLOW = "MENSTRUATION_FLOW"
     
     // SYMPTOMS
     let ABDOMINAL_CRAMPS = "ABDOMINAL_CRAMPS"
@@ -85,6 +107,65 @@ public class SwiftHealthPlugin: NSObject, FlutterPlugin {
     let VAGINAL_DRYNESS = "VAGINAL_DRYNESS"
     let VOMITING = "VOMITING"
     let WHEEZING = "WHEEZING"
+    
+    // Health Unit types
+    // MOLE_UNIT_WITH_MOLAR_MASS, // requires molar mass input - not supported yet
+    // MOLE_UNIT_WITH_PREFIX_MOLAR_MASS, // requires molar mass & prefix input - not supported yet
+    let GRAM = "GRAM"
+    let KILOGRAM = "KILOGRAM"
+    let KILOGRAMS = "KILOGRAMS"
+    let OUNCE = "OUNCE"
+    let POUND = "POUND"
+    let STONE = "STONE"
+    let METER = "METER"
+    let METERS = "METERS"
+    let INCH = "INCH"
+    let FOOT = "FOOT"
+    let YARD = "YARD"
+    let MILE = "MILE"
+    let LITER = "LITER"
+    let MILLILITER = "MILLILITER"
+    let FLUID_OUNCE_US = "FLUID_OUNCE_US"
+    let FLUID_OUNCE_IMPERIAL = "FLUID_OUNCE_IMPERIAL"
+    let CUP_US = "CUP_US"
+    let CUP_IMPERIAL = "CUP_IMPERIAL"
+    let PINT_US = "PINT_US"
+    let PINT_IMPERIAL = "PINT_IMPERIAL"
+    let PASCAL = "PASCAL"
+    let MILLIMETER_OF_MERCURY = "MILLIMETER_OF_MERCURY"
+    let INCHES_OF_MERCURY = "INCHES_OF_MERCURY"
+    let CENTIMETER_OF_WATER = "CENTIMETER_OF_WATER"
+    let ATMOSPHERE = "ATMOSPHERE"
+    let DECIBEL_A_WEIGHTED_SOUND_PRESSURE_LEVEL = "DECIBEL_A_WEIGHTED_SOUND_PRESSURE_LEVEL"
+    let SECOND = "SECOND"
+    let MILLISECOND = "MILLISECOND"
+    let MILLISECONDS = "MILLISECONDS"
+    let MINUTE = "MINUTE"
+    let MINUTES = "MINUTES"
+    let HOUR = "HOUR"
+    let DAY = "DAY"
+    let JOULE = "JOULE"
+    let KILOCALORIE = "KILOCALORIE"
+    let LARGE_CALORIE = "LARGE_CALORIE"
+    let SMALL_CALORIE = "SMALL_CALORIE"
+    let CALORIES = "CALORIES"
+    let DEGREE_CELSIUS = "DEGREE_CELSIUS"
+    let DEGREE_FAHRENHEIT = "DEGREE_FAHRENHEIT"
+    let KELVIN = "KELVIN"
+    let DECIBEL_HEARING_LEVEL = "DECIBEL_HEARING_LEVEL"
+    let HERTZ = "HERTZ"
+    let SIEMEN = "SIEMEN"
+    let VOLT = "VOLT"
+    let VOLTS = "VOLTS" // We are sending "VOLTS" as part of our custom implementation for ECG support
+    let INTERNATIONAL_UNIT = "INTERNATIONAL_UNIT"
+    let COUNT = "COUNT"
+    let PERCENT = "PERCENT"
+    let PERCENTAGE = "PERCENTAGE"
+    let BEATS_PER_MINUTE = "BEATS_PER_MINUTE"
+    let RESPIRATIONS_PER_MINUTE = "RESPIRATIONS_PER_MINUTE"
+    let MILLIGRAM_PER_DECILITER = "MILLIGRAM_PER_DECILITER"
+    let UNKNOWN_UNIT = "UNKNOWN_UNIT"
+    let NO_UNIT = "NO_UNIT"
     
     
     public static func register(with registrar: FlutterPluginRegistrar) {
@@ -145,20 +226,29 @@ public class SwiftHealthPlugin: NSObject, FlutterPlugin {
     func getData(call: FlutterMethodCall, result: @escaping FlutterResult) {
         let arguments = call.arguments as? NSDictionary
         let dataTypeKey = (arguments?["dataTypeKey"] as? String) ?? "DEFAULT"
+        let dataUnitKey = (arguments?["dataUnitKey"] as? String)
         let startDate = (arguments?["startDate"] as? NSNumber) ?? 0
         let endDate = (arguments?["endDate"] as? NSNumber) ?? 0
         let healthStore = HKHealthStore()
         
+        NSLog("dataUnitKey: \(dataUnitKey)")
+
         // Convert dates from milliseconds to Date()
         let dateFrom = Date(timeIntervalSince1970: startDate.doubleValue / 1000)
         let dateTo = Date(timeIntervalSince1970: endDate.doubleValue / 1000)
-        
+
         var dataType = dataTypeLookUp(key: dataTypeKey)
+        var unit: HKUnit?
+        if let dataUnitKey = dataUnitKey {
+            unit = unitDict[dataUnitKey]
+        }
         
+        NSLog("unit: \(unit)")
+
         let predicate = HKQuery.predicateForSamples(
             withStart: dateFrom, end: dateTo, options: .strictStartDate)
         let sortDescriptor = NSSortDescriptor(key: HKSampleSortIdentifierEndDate, ascending: true)
-        
+
         let query = HKSampleQuery(
             sampleType: dataType, predicate: predicate, limit: HKObjectQueryNoLimit,
             sortDescriptors: [sortDescriptor]
@@ -173,30 +263,30 @@ public class SwiftHealthPlugin: NSObject, FlutterPlugin {
                         }
                         result(
                             samplesEcg.map { sample -> NSDictionary in
-                                
+
                                 let voltages = self.getVoltages(sample: sample)
                                 let period = 1000 / (sample.samplingFrequency?.doubleValue(for: HKUnit.hertz()))!
-                                
+
                                 //let symptoms = self.getAllSymptoms(from: sample)
-                                
+
                                 let ecgDictionary: NSMutableDictionary = [
                                     "values": voltages,
                                     "interpretation": sample.classification.rawValue,
                                     "period": period,
                                     //"symptoms": symptoms
                                 ]
-                                
+
                                 if let averageHeartRate = sample.averageHeartRate?.doubleValue(for: HKUnit.count().unitDivided(by: .minute())) {
                                     ecgDictionary["average_heart_rate"] = averageHeartRate
                                 }
-                                
+
                                 let sampleDictionary: NSMutableDictionary = [
                                     "uuid": "\(sample.uuid)",
                                     "ecg": ecgDictionary,
                                     "date_from": Int(sample.startDate.timeIntervalSince1970 * 1000),
                                     "date_to": Int(sample.endDate.timeIntervalSince1970 * 1000)
                                 ]
-                                
+
                                 return sampleDictionary
                             })
                     }
@@ -205,11 +295,11 @@ public class SwiftHealthPlugin: NSObject, FlutterPlugin {
                 return
             }
             result(samples.map { sample -> NSDictionary in
-                let unit = self.unitLookUp(key: dataTypeKey)
-                
+                //let unit = self.unitLookUp(key: dataTypeKey)
+
                 return [
                     "uuid": "\(sample.uuid)",
-                    "value": sample.quantity.doubleValue(for: unit),
+                    "value": sample.quantity.doubleValue(for: unit!),
                     "date_from": Int(sample.startDate.timeIntervalSince1970 * 1000),
                     "date_to": Int(sample.endDate.timeIntervalSince1970 * 1000),
                     "source_id": sample.sourceRevision.source.bundleIdentifier,
@@ -360,14 +450,17 @@ public class SwiftHealthPlugin: NSObject, FlutterPlugin {
     func initializeTypes() {
         unitDict[ACTIVE_ENERGY_BURNED] = HKUnit.kilocalorie()
         unitDict[BASAL_ENERGY_BURNED] = HKUnit.kilocalorie()
+        unitDict[CALORIES] = HKUnit.kilocalorie()
         unitDict[BLOOD_GLUCOSE] = HKUnit.init(from: "mg/dl")
         unitDict[BLOOD_OXYGEN] = HKUnit.percent()
         unitDict[BLOOD_PRESSURE_DIASTOLIC] = HKUnit.millimeterOfMercury()
         unitDict[BLOOD_PRESSURE_SYSTOLIC] = HKUnit.millimeterOfMercury()
         unitDict[BODY_FAT_PERCENTAGE] = HKUnit.percent()
+        unitDict[PERCENTAGE] = HKUnit.percent()
         unitDict[BODY_MASS_INDEX] = HKUnit.init(from: "")
         unitDict[BODY_TEMPERATURE] = HKUnit.degreeCelsius()
         unitDict[ELECTRODERMAL_ACTIVITY] = HKUnit.siemen()
+        unitDict[SIEMENS] = HKUnit.siemen()
         unitDict[HEART_RATE] = HKUnit.init(from: "count/min")
         unitDict[HEART_RATE_VARIABILITY_SDNN] = HKUnit.secondUnit(with: .milli)
         unitDict[HEIGHT] = HKUnit.meter()
@@ -383,8 +476,61 @@ public class SwiftHealthPlugin: NSObject, FlutterPlugin {
         unitDict[SLEEP_IN_BED] = HKUnit.init(from: "")
         unitDict[SLEEP_ASLEEP] = HKUnit.init(from: "")
         unitDict[SLEEP_AWAKE] = HKUnit.init(from: "")
+        unitDict[GRAM] = HKUnit.gram()
+        unitDict[KILOGRAM] = HKUnit.gramUnit(with: .kilo)
+        unitDict[KILOGRAMS] = HKUnit.gramUnit(with: .kilo)
+        unitDict[OUNCE] = HKUnit.ounce()
+        unitDict[POUND] = HKUnit.pound()
+        unitDict[STONE] = HKUnit.stone()
+        unitDict[METER] = HKUnit.meter()
+        unitDict[METERS] = HKUnit.meter()
+        unitDict[INCH] = HKUnit.inch()
+        unitDict[FOOT] = HKUnit.foot()
+        unitDict[YARD] = HKUnit.yard()
+        unitDict[MILE] = HKUnit.mile()
+        unitDict[LITER] = HKUnit.liter()
+        unitDict[MILLILITER] = HKUnit.literUnit(with: .milli)
+        unitDict[FLUID_OUNCE_US] = HKUnit.fluidOunceUS()
+        unitDict[FLUID_OUNCE_IMPERIAL] = HKUnit.fluidOunceImperial()
+        unitDict[CUP_US] = HKUnit.cupUS()
+        unitDict[CUP_IMPERIAL] = HKUnit.cupImperial()
+        unitDict[PINT_US] = HKUnit.pintUS()
+        unitDict[PINT_IMPERIAL] = HKUnit.pintImperial()
+        unitDict[PASCAL] = HKUnit.pascal()
+        unitDict[MILLIMETER_OF_MERCURY] = HKUnit.millimeterOfMercury()
+        unitDict[CENTIMETER_OF_WATER] = HKUnit.centimeterOfWater()
+        unitDict[ATMOSPHERE] = HKUnit.atmosphere()
+        unitDict[DECIBEL_A_WEIGHTED_SOUND_PRESSURE_LEVEL] = HKUnit.decibelAWeightedSoundPressureLevel()
+        unitDict[SECOND] = HKUnit.second()
+        unitDict[MILLISECOND] = HKUnit.secondUnit(with: .milli)
+        unitDict[MILLISECONDS] = HKUnit.secondUnit(with: .milli)
+        unitDict[MINUTE] = HKUnit.minute()
+        unitDict[MINUTES] = HKUnit.minute()
+        unitDict[HOUR] = HKUnit.hour()
+        unitDict[DAY] = HKUnit.day()
+        unitDict[JOULE] = HKUnit.joule()
+        unitDict[KILOCALORIE] = HKUnit.kilocalorie()
+        unitDict[LARGE_CALORIE] = HKUnit.largeCalorie()
+        unitDict[SMALL_CALORIE] = HKUnit.smallCalorie()
+        unitDict[DEGREE_CELSIUS] = HKUnit.degreeCelsius()
+        unitDict[DEGREE_FAHRENHEIT] = HKUnit.degreeFahrenheit()
+        unitDict[KELVIN] = HKUnit.kelvin()
+        unitDict[DECIBEL_HEARING_LEVEL] = HKUnit.decibelHearingLevel()
+        unitDict[HERTZ] = HKUnit.hertz()
+        unitDict[SIEMEN] = HKUnit.siemen()
+        unitDict[INTERNATIONAL_UNIT] = HKUnit.internationalUnit()
+        unitDict[COUNT] = HKUnit.count()
+        unitDict[PERCENT] = HKUnit.percent()
+        unitDict[BEATS_PER_MINUTE] = HKUnit.init(from: "count/min")
+        unitDict[RESPIRATIONS_PER_MINUTE] = HKUnit.init(from: "count/min")
+        unitDict[MILLIGRAM_PER_DECILITER] = HKUnit.init(from: "mg/dL")
+        unitDict[UNKNOWN_UNIT] = HKUnit.init(from: "")
+        unitDict[NO_UNIT] = HKUnit.init(from: "")
         if #available(iOS 14.4, *) {
             unitDict[ELECTROCARDIOGRAM] = HKUnit.volt()
+            unitDict[VOLT] = HKUnit.volt()
+            unitDict[VOLTS] = HKUnit.volt()
+            unitDict[INCHES_OF_MERCURY] = HKUnit.inchesOfMercury()
         }
         
         // Set up iOS 11 specific types (ordinary health data types)
