@@ -107,13 +107,14 @@ class HealthFactory {
   /// The main function for fetching health data
   Future<List<HealthDataPoint>> _dataQuery(DateTime startDate, DateTime endDate, HealthDataType dataType) async {
     // Set parameters for method channel request
+    final unit = _dataTypeToUnit[dataType]!;
     final args = <String, dynamic>{
       'dataTypeKey': _enumToString(dataType),
+      'dataUnitKey': unit.name,
       'startDate': startDate.millisecondsSinceEpoch,
       'endDate': endDate.millisecondsSinceEpoch
     };
 
-    final unit = _dataTypeToUnit[dataType]!;
     final fetchedDataPoints = await _channel.invokeMethod('getData', args);
     if (fetchedDataPoints != null) {
       return fetchedDataPoints.map<HealthDataPoint>((e) {
