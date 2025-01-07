@@ -7,7 +7,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:collection/collection.dart';
 import 'dart:io' show Platform;
-import 'package:device_info/device_info.dart';
+import 'package:flutter_udid/flutter_udid.dart';
 
 part 'src/data_types.dart';
 part 'src/functions.dart';
